@@ -2,9 +2,13 @@ package com.easyticket.api.services;
 
 import com.easyticket.api.domain.event.Event;
 import com.easyticket.api.domain.event.EventRequestDTO;
+import com.easyticket.api.domain.event.EventResponseDTO;
 import com.easyticket.api.repositories.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -14,6 +18,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -46,6 +51,23 @@ public class EventService {
         repository.save(newEvent);
 
         return newEvent;
+    }
+
+    public List<EventResponseDTO> getUpcomingEvents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = this.repository.findAll(pageable);
+        return eventsPage.map(event -> new EventResponseDTO(
+                        event.getId(),
+                        event.getTitle(),
+                        event.getDescription(),
+                        event.getDate(),
+                        "",
+                        "",
+                        event.getRemote(),
+                        event.getEventUrl(),
+                        event.getImgUrl())
+                )
+                .stream().toList();
     }
 
     private String uploadImg(MultipartFile multipartFile) {
