@@ -1,4 +1,4 @@
-package com.easyticket.api.domain.event.coupon;
+package com.easyticket.api.domain.coupon;
 
 
 import com.easyticket.api.domain.event.Event;

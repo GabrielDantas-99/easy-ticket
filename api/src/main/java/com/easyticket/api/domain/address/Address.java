@@ -1,4 +1,4 @@
-package com.easyticket.api.domain.event.address;
+package com.easyticket.api.domain.address;
 
 import com.easyticket.api.domain.event.Event;
 import jakarta.persistence.*;

@@ -1,6 +1,6 @@
 package com.easyticket.api.repositories;
 
-import com.easyticket.api.domain.event.coupon.Coupon;
+import com.easyticket.api.domain.coupon.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
