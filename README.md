@@ -4,6 +4,17 @@
 
 **Easy Ticket** é um projeto voltado para o gerenciamento de eventos, desenvolvido como parte de uma aplicação prática dos conhecimentos em Spring Boot, Angular 17, PostgreSQL e AWS. O sistema permite o cadastro, listagem, filtragem e detalhamento de eventos, além da associação de cupons de desconto para os participantes.
 
+<div style="display: inline-block"><br>
+  
+  <img align="center" alt="Angular image" height="40" width="40" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/angular/angular-original.svg" />
+  <img align="center" alt="Spring image" height="40" width="40" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" />
+  <img align="center" alt="Spring image" height="40" width="40" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/spring/spring-original.svg" />
+  <img align="center" alt="Postgresql image" height="40" width="40" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" />
+  <img align="center" alt="Postgresql image" height="40" width="40" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" />
+          
+          
+</div>
+
 ## **Funcionalidades**
 
 - **Cadastro de Eventos:** Criação de eventos com detalhes como nome, data, local, e descrição.
