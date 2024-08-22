@@ -1,6 +1,7 @@
 package com.easyticket.api.controllers;
 
 import com.easyticket.api.domain.event.Event;
+import com.easyticket.api.domain.event.EventDetailsDTO;
 import com.easyticket.api.domain.event.EventRequestDTO;
 import com.easyticket.api.domain.event.EventResponseDTO;
 import com.easyticket.api.services.EventService;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/events")
@@ -35,6 +37,7 @@ public class EventController {
         return ResponseEntity.ok(newEvent);
     }
 
+
     @GetMapping
     public ResponseEntity<List<EventResponseDTO>> getEvents(
             @RequestParam(defaultValue = "0") int page,
@@ -43,6 +46,13 @@ public class EventController {
         List<EventResponseDTO> allEvents = this.eventService.getUpcomingEvents(page, size);
         return ResponseEntity.ok(allEvents);
     }
+
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventDetailsDTO> getEventDetails(@PathVariable UUID eventId) {
+        EventDetailsDTO eventDetails = eventService.getEventDetails(eventId);
+        return ResponseEntity.ok(eventDetails);
+    }
+
 
     @GetMapping("/filter")
     public ResponseEntity<List<EventResponseDTO>> filterEvents(

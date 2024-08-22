@@ -5,7 +5,6 @@ import com.easyticket.api.domain.coupon.CouponRequestDTO;
 import com.easyticket.api.domain.event.Event;
 import com.easyticket.api.repositories.CouponRepository;
 import com.easyticket.api.repositories.EventRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -15,11 +14,13 @@ import java.util.UUID;
 @Service
 public class CouponService {
 
-    @Autowired
-    private CouponRepository couponRepository;
+    private final CouponRepository couponRepository;
+    private final EventRepository eventRepository;
 
-    @Autowired
-    private EventRepository eventRepository;
+    public CouponService(CouponRepository couponRepository, EventRepository eventRepository) {
+        this.couponRepository = couponRepository;
+        this.eventRepository = eventRepository;
+    }
 
     public Coupon addCouponToEvent(UUID eventId, CouponRequestDTO couponData) {
         Event event = eventRepository.findById(eventId)
@@ -34,4 +35,7 @@ public class CouponService {
         return couponRepository.save(coupon);
     }
 
+    public List<Coupon> consultCoupons(UUID eventId, Date currentDate) {
+        return couponRepository.findByEventIdAndValidAfter(eventId, currentDate);
+    }
 }

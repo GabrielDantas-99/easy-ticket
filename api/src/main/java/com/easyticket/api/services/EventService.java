@@ -1,6 +1,9 @@
 package com.easyticket.api.services;
 
+import com.easyticket.api.domain.address.Address;
+import com.easyticket.api.domain.coupon.Coupon;
 import com.easyticket.api.domain.event.Event;
+import com.easyticket.api.domain.event.EventDetailsDTO;
 import com.easyticket.api.domain.event.EventRequestDTO;
 import com.easyticket.api.domain.event.EventResponseDTO;
 import com.easyticket.api.repositories.EventRepository;
@@ -19,10 +22,8 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.nio.ByteBuffer;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -36,14 +37,43 @@ public class EventService {
     private final StringValidator stringValidator;
     private final DateProvider dateProvider;
     private final AddressService addressService;
+    private final CouponService couponService;
 
     public EventService(EventRepository repository, AddressService addressService, S3Client s3Client,
-                        StringValidator stringValidator, DateProvider dateProvider) {
+                        StringValidator stringValidator, DateProvider dateProvider, CouponService couponService) {
         this.repository = repository;
         this.addressService = addressService;
         this.s3Client = s3Client;
         this.stringValidator = stringValidator;
         this.dateProvider = dateProvider;
+        this.couponService = couponService;
+    }
+
+    public EventDetailsDTO getEventDetails(UUID eventId) {
+        Event event = repository.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+
+        Optional<Address> address = addressService.findByEventId(eventId);
+
+        List<Coupon> coupons = couponService.consultCoupons(eventId, new Date());
+
+        List<EventDetailsDTO.CouponDTO> couponDTOs = coupons.stream()
+                .map(coupon -> new EventDetailsDTO.CouponDTO(
+                        coupon.getCode(),
+                        coupon.getDiscount(),
+                        coupon.getValid()))
+                .collect(Collectors.toList());
+
+        return new EventDetailsDTO(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getDate(),
+                address.isPresent() ? address.get().getCity() : "",
+                address.isPresent() ? address.get().getUf() : "",
+                event.getImgUrl(),
+                event.getEventUrl(),
+                couponDTOs);
     }
 
     public Event createEvent(EventRequestDTO data) {
