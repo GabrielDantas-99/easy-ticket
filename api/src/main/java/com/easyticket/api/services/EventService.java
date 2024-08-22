@@ -4,6 +4,8 @@ import com.easyticket.api.domain.event.Event;
 import com.easyticket.api.domain.event.EventRequestDTO;
 import com.easyticket.api.domain.event.EventResponseDTO;
 import com.easyticket.api.repositories.EventRepository;
+import com.easyticket.api.util.date.DateProvider;
+import com.easyticket.api.util.validator.StringValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -25,17 +27,24 @@ import java.util.UUID;
 @Service
 public class EventService {
 
-    @Autowired
-    private S3Client s3Client;
 
     @Value("${aws.bucket.name}")
     private String bucketName;
 
-    @Autowired
-    private EventRepository repository;
+    private final S3Client s3Client;
+    private final EventRepository repository;
+    private final StringValidator stringValidator;
+    private final DateProvider dateProvider;
+    private final AddressService addressService;
 
-    @Autowired
-    private AddressService addressService;
+    public EventService(EventRepository repository, AddressService addressService, S3Client s3Client,
+                        StringValidator stringValidator, DateProvider dateProvider) {
+        this.repository = repository;
+        this.addressService = addressService;
+        this.s3Client = s3Client;
+        this.stringValidator = stringValidator;
+        this.dateProvider = dateProvider;
+    }
 
     public Event createEvent(EventRequestDTO data) {
         String imgUrl = null;
@@ -70,16 +79,12 @@ public class EventService {
     public List<EventResponseDTO> getFilteredEvents(
             int page, int size,  String title, String city, String uf, Date startDate, Date endDate
     ){
-        // TODO: Criar metodo para verificar nulidade
-        title = (title != null) ? title : "";
-        city = (city != null) ? city : "";
-        uf = (uf != null) ? uf : "";
-        startDate = (startDate == null) ? new Date() : startDate;
-        if (endDate == null) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.YEAR, 10);
-            endDate = calendar.getTime();
-        }
+        title = stringValidator.validate(title, "");
+        city = stringValidator.validate(city, "");
+        uf = stringValidator.validate(uf, "");
+
+        startDate = dateProvider.getStartDate(startDate);
+        endDate = dateProvider.getEndDate(endDate);
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Event> eventsPage = this.repository.findFilteredEvents(title, city, uf, startDate, endDate, pageable);
