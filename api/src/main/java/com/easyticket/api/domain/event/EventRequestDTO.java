@@ -7,7 +7,7 @@ public record EventRequestDTO(
         String description,
         Long date,
         String city,
-        String state,
+        String uf,
         Boolean remote,
         String eventUrl,
         MultipartFile image

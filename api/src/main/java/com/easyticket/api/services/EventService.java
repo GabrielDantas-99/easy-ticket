@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.nio.ByteBuffer;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +33,9 @@ public class EventService {
 
     @Autowired
     private EventRepository repository;
+
+    @Autowired
+    private AddressService addressService;
 
     public Event createEvent(EventRequestDTO data) {
         String imgUrl = null;
@@ -50,24 +54,36 @@ public class EventService {
 
         repository.save(newEvent);
 
+        if (!data.remote()) {
+            this.addressService.createAddress(data, newEvent);
+        }
+
         return newEvent;
     }
 
     public List<EventResponseDTO> getUpcomingEvents(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Event> eventsPage = this.repository.findUpcomingEvents(new Date(), pageable);
-        return eventsPage.map(event -> new EventResponseDTO(
-                        event.getId(),
-                        event.getTitle(),
-                        event.getDescription(),
-                        event.getDate(),
-                        "",
-                        "",
-                        event.getRemote(),
-                        event.getEventUrl(),
-                        event.getImgUrl())
-                )
-                .stream().toList();
+        return EventResponseDTO.pageToDTOList(eventsPage);
+    }
+
+    public List<EventResponseDTO> getFilteredEvents(
+            int page, int size,  String title, String city, String uf, Date startDate, Date endDate
+    ){
+        // TODO: Criar metodo para verificar nulidade
+        title = (title != null) ? title : "";
+        city = (city != null) ? city : "";
+        uf = (uf != null) ? uf : "";
+        startDate = (startDate == null) ? new Date() : startDate;
+        if (endDate == null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, 10);
+            endDate = calendar.getTime();
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = this.repository.findFilteredEvents(title, city, uf, startDate, endDate, pageable);
+        return EventResponseDTO.pageToDTOList(eventsPage);
     }
 
     private String uploadImg(MultipartFile multipartFile) {
